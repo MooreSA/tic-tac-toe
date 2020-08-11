@@ -1,50 +1,60 @@
 class Game
-    def initialize(player_one, player_two)
-        @board = Board.new
-        @players = {
-            0 => Player.new(player_one, 'x'),
-            1 => Player.new(player_two, 'o')
-        }
-    end
+  def initialize
+    @board = Board.new
+  end
 
-    def turn(player_id)
-        @board.display_board
-        puts "Choose your move!"
-        puts "Row 0, 1, or 2?"
-        row = gets.chomp.to_i
-        puts "Column 0, 1, or 2?"
-        col = gets.chomp.to_i
-        @board.check_valid_move(row, col)
+  def choose_move(piece)
+    @board.display_board
+    puts 'Choose your move!'
+    puts 'Row 0, 1, or 2?'
+    row = gets.chomp.to_i
+    puts 'Column 0, 1, or 2?'
+    col = gets.chomp.to_i
+    if @board.check_valid_move(row, col)
+      @board.save_move(piece, row, col)
+    else
+      puts 'INVALID MOVE'
+      choose_move(piece)
     end
-
+  end
 end
 
 class Board
-    def initialize
-        @board = Array.new(3) {Array.new(3)}
-    end
+  def initialize
+    @board = Array.new(3) { Array.new(3) { ' ' } }
+  end
 
-    def check_valid_move(row, col)
-        @board[row][col] == nil ? true : false
-    end
+  def check_valid_move(row, col)
+    return false unless row.between?(0, 2)
+    return false unless col.between?(0, 2)
+    return false if @board[row][col] != ' '
 
-    def display_board
-        p @board
+    true
+  end
+
+
+  def save_move(piece, row, col)
+    @board[row][col] = piece
+    check_winner
+  end
+
+  def check_winner
+    3.times do |index|
+      puts 'X wins!' if @board[index].all?('X')
+      puts '0 wins!' if @board[index].all?('0')
     end
+  end
+
+  def display_board
+    puts
+    puts
+    @board.each_with_index do |row, index|
+      puts row.join(' | ')
+      puts '---------' unless index == 2
+    end
+    puts
+    puts
+  end
 end
-
-class Player
-    def initialize(name, piece)
-        @name = name
-        @piece = piece
-    end
-end
-
-
-def play
-    game = Game.new("Seamus", "Anna")
-    game.turn(1)
-end
-
-play()
-
+new_game = Game.new
+loop { new_game.choose_move('X') }
