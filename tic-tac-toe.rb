@@ -4,12 +4,9 @@ class Game
   end
 
   def choose_move(piece)
-    @board.display_board
     puts 'Choose your move!'
-    puts 'Row 0, 1, or 2?'
-    row = gets.chomp.to_i
-    puts 'Column 0, 1, or 2?'
-    col = gets.chomp.to_i
+    row = get_move('Row')
+    col = get_move('Column')
     if @board.check_valid_move(row, col)
       @board.save_move(piece, row, col)
     else
@@ -17,11 +14,36 @@ class Game
       choose_move(piece)
     end
   end
+
+  def turn(piece_a, piece_b)
+    @board.display_board
+    choose_move(piece_a)
+    if @board.check_winner(piece_a)
+      @board.display_board
+      puts "#{piece_a} Wins!"
+      return
+    end
+    if @board.check_tie
+      @board.display_board
+      puts 'TIE'
+      return
+    end
+    turn(piece_b, piece_a)
+  end
+
+  def get_move(position)
+    puts "#{position} 0, 1, or 2?"
+    gets.chomp.to_i
+  end
 end
 
 class Board
   def initialize
     @board = Array.new(3) { Array.new(3) { ' ' } }
+  end
+
+  def check_tie
+    @board.flatten.none?(' ')
   end
 
   def check_valid_move(row, col)
@@ -34,32 +56,25 @@ class Board
 
   def save_move(piece, row, col)
     @board[row][col] = piece
-    check_winner
   end
 
-  def check_winner
-    check_diags
+  def check_winner(piece)
+    return true if check_diags(piece)
+
     3.times do |index|
-      check_row(index)
-      check_col(index)
+      return true if check_lines(index, piece)
     end
+    false
   end
 
-  def check_row(index)
-    puts 'X wins!' if @board[index].all?('X')
-    puts '0 wins!' if @board[index].all?('0')
+  def check_lines(index, piece)
+    return true if @board[index].all?(piece)
+    return true if [@board[0][index], @board[1][index], @board[2][index]].all?(piece)
   end
 
-  def check_col(index)
-    puts 'X wins!' if [@board[0][index], @board[1][index], @board[2][index]].all?('X') # check cols
-    puts '0 wins!' if [@board[0][index], @board[1][index], @board[2][index]].all?('0')
-  end
-
-  def check_diags
-    puts 'X wins!' if [@board[0][0], @board[1][1], @board[2][2]].all?('X')
-    puts 'X wins!' if [@board[2][0], @board[1][1], @board[0][2]].all?('X')
-    puts 'Y wins!' if [@board[0][0], @board[1][1], @board[2][2]].all?('Y')
-    puts 'Y wins!' if [@board[2][0], @board[1][1], @board[0][2]].all?('Y')
+  def check_diags(piece)
+    puts "#{piece} wins!" if [@board[0][0], @board[1][1], @board[2][2]].all?(piece)
+    puts "#{piece} wins!" if [@board[2][0], @board[1][1], @board[0][2]].all?(piece)
   end
 
   def display_board
@@ -74,4 +89,4 @@ class Board
   end
 end
 new_game = Game.new
-loop { new_game.choose_move('X') }
+new_game.turn('X', '0')
