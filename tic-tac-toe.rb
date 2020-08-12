@@ -32,17 +32,34 @@ class Board
     true
   end
 
-
   def save_move(piece, row, col)
     @board[row][col] = piece
     check_winner
   end
 
   def check_winner
+    check_diags
     3.times do |index|
-      puts 'X wins!' if @board[index].all?('X')
-      puts '0 wins!' if @board[index].all?('0')
+      check_row(index)
+      check_col(index)
     end
+  end
+
+  def check_row(index)
+    puts 'X wins!' if @board[index].all?('X')
+    puts '0 wins!' if @board[index].all?('0')
+  end
+
+  def check_col(index)
+    puts 'X wins!' if [@board[0][index], @board[1][index], @board[2][index]].all?('X') # check cols
+    puts '0 wins!' if [@board[0][index], @board[1][index], @board[2][index]].all?('0')
+  end
+
+  def check_diags
+    puts 'X wins!' if [@board[0][0], @board[1][1], @board[2][2]].all?('X')
+    puts 'X wins!' if [@board[2][0], @board[1][1], @board[0][2]].all?('X')
+    puts 'Y wins!' if [@board[0][0], @board[1][1], @board[2][2]].all?('Y')
+    puts 'Y wins!' if [@board[2][0], @board[1][1], @board[0][2]].all?('Y')
   end
 
   def display_board
